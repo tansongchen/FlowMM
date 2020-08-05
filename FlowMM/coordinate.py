@@ -1,5 +1,5 @@
 '''
-Transform the Cartesian coordinates to internal coordinates
+Transforming Cartesian coordinates to internal coordinates
 '''
 
 from nflows.transforms import Transform
@@ -8,7 +8,7 @@ import torch
 
 class Atom:
     '''
-    Atom
+    Data structure consisting of index and graph infomation
     '''
     def __init__(self, index, label):
         self.index = index
@@ -20,15 +20,14 @@ class Atom:
     def __repr__(self):
         return f'{self.index}: {self.label}'
 
-class InternalCoordinateTransform(Transform):
+class CoordinateTransform(Transform):
     '''
-    Implement
+    Transform between Cartesian coordinates and internal coordinates
     '''
 
     def __init__(self, graph: Graph):
         '''
-        The CoordinateTransformer class is initialized using
-        the bond information of a molecule.
+        Initializing using the molecular graph
         '''
         super().__init__()
         self.graph = graph
@@ -72,7 +71,7 @@ class InternalCoordinateTransform(Transform):
 
     def forward(self, cartesian, context=None):
         '''
-        doc
+        Convert from Cartesian coordinates to internal coordinates
         '''
         N = cartesian.shape[0]
         n = self.graph.number_of_nodes()
@@ -110,7 +109,7 @@ class InternalCoordinateTransform(Transform):
 
     def inverse(self, internal, context=None):
         '''
-        Inverse
+        Convert from internal coordinates to Cartesian coordinates
         '''
 
         N = internal.shape[0]

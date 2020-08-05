@@ -1,10 +1,11 @@
 '''
+Test case using an artificial force field that resembles hydrogen peroxide
 '''
 
 from networkx import Graph
-from nflows.flows import Flow
-from FlowMM import Atom, CombinedBaseDistribution, BADCompositeTransform
 import torch
+from nflows.flows import Flow
+from FlowMM import Atom, MMBaseDistribution, MMTransform
 
 H2O2 = Graph()
 
@@ -17,9 +18,9 @@ H2O2.add_nodes_from([H1, O1, O2, H2])
 H2O2.add_edges_from([(H1, O1), (O1, O2), (O2, H2)])
 H2O2.graph['reference_atoms'] = (O1, H1, O2)
 
-bad = BADCompositeTransform(H2O2, 1)
-base = CombinedBaseDistribution(H2O2)
-flow = Flow(bad, base)
+mm = MMTransform(H2O2, 1)
+base = MMBaseDistribution(H2O2)
+flow = Flow(mm, base)
 
 cart = torch.Tensor([
     [
@@ -30,10 +31,5 @@ cart = torch.Tensor([
     ]
 ])
 
-i, l = bad.forward(cart)
-
-print(i, l)
-
-c, l = bad.inverse(i)
-
-print(c, l)
+i, l = mm.forward(cart)
+c, l = mm.inverse(i)

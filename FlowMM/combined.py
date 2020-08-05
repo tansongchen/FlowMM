@@ -8,8 +8,9 @@ from nflows.distributions.base import Distribution
 from nflows.distributions import DiagonalNormal
 from nflows.distributions.uniform import BoxUniform
 
-class CombinedBaseDistribution(Distribution):
+class MMBaseDistribution(Distribution):
     '''
+    Base distribution for bonds, angles and dihedrals corresponding to a naive additive force field
     '''
 
     def __init__(self, graph):
