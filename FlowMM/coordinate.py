@@ -67,7 +67,7 @@ class CoordinateTransform(Transform):
     def _logabsdet(bond, angle):
         return torch.sum(torch.log(torch.abs(
             bond[:, :-2]**2*torch.sin(angle[:, :-1])
-            )), -1) + torch.log(torch.abs(bond[:, -1]))
+            )), -1) + torch.log(torch.abs(bond[:, -1]**2))
 
     def forward(self, cartesian, context=None):
         '''
@@ -102,7 +102,7 @@ class CoordinateTransform(Transform):
             nn = torch.cross(nLKJK, nIJJK)
             y = self._innerProduct(rJK, nn)
             x = torch.norm(rJK, dim=-1) * self._innerProduct(nIJJK, nLKJK)
-            bond[:, index] = torch.norm(rLK**2, dim=-1)
+            bond[:, index] = torch.norm(rLK, dim=-1)
             angle[:, index] = torch.acos(self._innerProduct(uJK, uLK))
             dihedral[:, index] = torch.atan2(y, x)
         return internal, -self._logabsdet(bond, angle)
@@ -129,7 +129,7 @@ class CoordinateTransform(Transform):
             z = self._normalize(rJK)
             rIJ = cartesian[:, i, :] - cartesian[:, j, :]
             y = self._normalize(torch.cross(rIJ, rJK, dim=-1))
-            x = torch.cross(y, z, dim=-1)
-            u = torch.sin(angle[:, index]) * torch.cos(dihedral[:, index]) * x + torch.sin(angle[:, index]) * torch.sin(dihedral[:, index]) * y + torch.cos(angle[:, index]) * z
-            cartesian[:, l, :] = cartesian[:, k, :] + bond[:, index] * u
+            x = torch.cross(z, y, dim=-1)
+            u = torch.sin(angle[:, index:index+1]) * torch.cos(dihedral[:, index:index+1]) * x + torch.sin(angle[:, index:index+1]) * torch.sin(dihedral[:, index:index+1]) * y + torch.cos(angle[:, index:index+1]) * z
+            cartesian[:, l, :] = cartesian[:, k, :] + bond[:, index:index+1] * u
         return cartesian, self._logabsdet(bond, angle)
