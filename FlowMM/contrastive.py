@@ -20,18 +20,25 @@ class Contrastive(Module):
         self.potential = potential
         self._flow = []
         self._flow.append(flow)
+        self.data = {
+            'model@data': [],
+            'model@noise': [],
+            'flow@data': [],
+            'flow@noise': []
+        }
 
-    def _log_ratio(self, u, epoch):
+    def _log_ratio(self, u, epoch, label):
         logProbModel = self.potential.logInversePartition - self.potential(u)
-        logProbNoise = self._flow[0].log_prob(u)
-        if epoch % 100 == 0: print(logProbModel.mean(), logProbNoise.mean())
-        return logProbModel - logProbNoise
+        logProbFlow = self._flow[0].log_prob(u)
+        if not epoch % 10:
+            self.data[f'model{label}'].append(logProbModel.mean().item())
+            self.data[f'flow{label}'].append(logProbFlow.mean().item())
+        return logProbModel - logProbFlow
 
     def forward(self, data: Tensor, noise: Tensor, epoch):
         nu = noise.shape[0] / data.shape[0]
-        GData = self._log_ratio(data, epoch)
-        GNoise = self._log_ratio(noise, epoch)
-        if epoch % 100 == 0: print(GData.mean(), GNoise.mean())
+        GData = self._log_ratio(data, epoch, '@data')
+        GNoise = self._log_ratio(noise, epoch, '@noise')
         logLikelihoodData = torch.log(1 / (1 + torch.exp(-GData) * nu))
         logLikelihoodNoise = torch.log(1 / (1 + torch.exp(GNoise) / nu))
         return - logLikelihoodData.mean() - logLikelihoodNoise.mean() * nu
