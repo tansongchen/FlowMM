@@ -4,7 +4,7 @@ Implements the contrastive learning.
 
 import torch
 from torch import Tensor
-from torch.nn import Module, Parameter
+from torch.nn import Module
 from nflows.flows import Flow
 
 class ForceField(Module):
@@ -28,9 +28,9 @@ class Contrastive(Module):
         }
 
     def _log_ratio(self, u, epoch, label):
-        logProbModel = self.potential.logInversePartition - self.potential(u)
+        logProbModel = self.potential(u)
         logProbFlow = self._flow[0].log_prob(u)
-        if not epoch % 10:
+        if not epoch % 100:
             self.data[f'model{label}'].append(logProbModel.mean().item())
             self.data[f'flow{label}'].append(logProbFlow.mean().item())
         return logProbModel - logProbFlow

@@ -18,7 +18,7 @@ class Atom:
         self.parents = None
 
     def __repr__(self):
-        return f'{self.index}: {self.label}'
+        return f'{self.index}: {self.predecessor.index}'
 
 class CoordinateTransform(Transform):
     '''
@@ -85,8 +85,8 @@ class CoordinateTransform(Transform):
         u21 = self._normalize(r21)
         u31 = self._normalize(r31)
 
-        bond[:, -2] = torch.norm(r21, dim=-1)
-        bond[:, -1] = torch.norm(r31, dim=-1)
+        bond[:, -2] = torch.norm(r31, dim=-1)
+        bond[:, -1] = torch.norm(r21, dim=-1)
         angle[:, -1] = torch.acos(self._innerProduct(u21, u31))
 
         # https://en.wikipedia.org/wiki/Dihedral_angle
